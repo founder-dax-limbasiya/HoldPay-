@@ -9,7 +9,7 @@ const HP = {
 
   // Supabase config (anon key = public safe)
   SUPABASE_URL: 'https://curruifdoznoafqniurv.supabase.co',
-  SUPABASE_ANON_KEY: '', // ← paste your anon key here
+  SUPABASE_ANON_KEY: '',eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN1cnJ1aWZkb3pub2FmcW5pdXJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxNzI1NDcsImV4cCI6MjA4OTc
 
   get FUNCTIONS_URL() {
     return `${this.SUPABASE_URL}/functions/v1`;
