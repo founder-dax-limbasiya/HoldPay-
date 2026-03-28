@@ -1,0 +1,51 @@
+// supabase/functions/check-payment/index.ts
+// Proxies OxaPay payment status check
+
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
+  }
+
+  try {
+    const OXAPAY_KEY = Deno.env.get("OXAPAY_MERCHANT_KEY");
+    if (!OXAPAY_KEY) {
+      return new Response(
+        JSON.stringify({ error: "Payment service not configured" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const { trackId } = await req.json();
+    if (!trackId) {
+      return new Response(
+        JSON.stringify({ error: "trackId required" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const res = await fetch("https://api.oxapay.com/merchants/inquiry", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ merchant: OXAPAY_KEY, trackId }),
+    });
+
+    const data = await res.json();
+    return new Response(JSON.stringify(data), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+
+  } catch (err) {
+    return new Response(
+      JSON.stringify({ error: "Internal error", detail: err.message }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+});
