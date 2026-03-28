@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — HoldPay</title>
+<link rel="stylesheet" href="css/main.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+.dash-wrap { display: flex; min-height: 100vh; background: var(--bg2); }
+
+/* SIDEBAR */
+.sidebar {
+  width: 240px; background: var(--white);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  padding: 28px 16px; position: fixed;
+  top: 0; left: 0; height: 100vh; z-index: 100;
+  transition: transform 0.3s;
+}
+@media(max-width:768px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .dash-main { margin-left: 0 !important; }
+}
+
+.sidebar-logo {
+  font-family: 'Clash Display', sans-serif;
+  font-size: 20px; font-weight: 700; color: var(--black);
+  display: flex; align-items: center; gap: 8px;
+  text-decoration: none; padding: 8px 12px; margin-bottom: 32px;
+}
+.sidebar-logo .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; }
+
+.sidebar-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: 2px; color: var(--muted);
+  padding: 0 12px; margin-bottom: 8px; margin-top: 16px;
+  text-transform: uppercase;
+}
+
+.sidebar-link {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: 8px;
+  font-size: 14px; font-weight: 600; color: var(--muted);
+  text-decoration: none; transition: all 0.15s;
+  margin-bottom: 2px;
+}
+.sidebar-link:hover { background: var(--bg2); color: var(--text); }
+.sidebar-link.active { background: rgba(96,48,240,0.08); color: var(--accent); }
+.sidebar-link .icon { width: 18px; text-align: center; font-size: 16px; }
+
+.sidebar-bottom { margin-top: auto; }
+.user-pill {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px; background: var(--bg2); border-radius: 10px;
+  margin-bottom: 8px;
+}
+.user-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--accent); display: flex; align-items: center;
+  justify-content: center; font-size: 14px; font-weight: 700; color: white;
+  flex-shrink: 0;
+}
+.user-email { font-size: 12px; color: var(--muted); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.user-name { font-size: 13px; font-weight: 700; color: var(--text); }
+
+/* MAIN */
+.dash-main {
+  margin-left: 240px; flex: 1; padding: 32px;
+  max-width: calc(100vw - 240px);
+}
+@media(max-width:768px) { .dash-main { margin-left: 0; max-width: 100vw; padding: 20px; } }
+
+/* TOP BAR */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 32px; flex-wrap: wrap; gap: 16px;
+}
+.topbar h1 {
+  font-family: 'Clash Display', sans-serif;
+  font-size: 28px; font-weight: 700; letter-spacing: -0.5px; color: var(--black);
+}
+.mobile-menu-btn {
+  display: none; background: none; border: 1.5px solid var(--border);
+  border-radius: 8px; padding: 8px 12px; cursor: pointer; font-size: 18px;
+}
+@media(max-width:768px) { .mobile-menu-btn { display: block; } }
+
+/* BALANCE CARD */
+.balance-card {
+  background: var(--black); border-radius: 24px;
+  padding: 36px; color: white; margin-bottom: 24px;
+  position: relative; overflow: hidden;
+}
+.balance-card::before {
+  content: ''; position: absolute; top: -30%; right: -10%;
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(96,48,240,0.4) 0%, transparent 60%);
+}
+.balance-card::after {
+  content: ''; position: absolute; bottom: -20%; left: 20%;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(255,51,102,0.2) 0%, transparent 60%);
+}
+.balance-card > * { position: relative; z-index: 1; }
+.balance-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: 2px; color: rgba(255,255,255,0.5);
+  margin-bottom: 8px; text-transform: uppercase;
+}
+.balance-amount {
+  font-family: 'Clash Display', sans-serif;
+  font-size: 56px; font-weight: 700; letter-spacing: -2px;
+  line-height: 1; margin-bottom: 4px;
+}
+.balance-inr { font-size: 16px; color: rgba(255,255,255,0.4); margin-bottom: 28px; font-weight: 500; }
+.balance-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+.balance-btn {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 10px; padding: 10px 20px;
+  color: white; font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+  font-family: 'Cabinet Grotesk', sans-serif;
+}
+.balance-btn:hover { background: rgba(255,255,255,0.18); transform: translateY(-1px); }
+.balance-btn.primary { background: var(--accent); border-color: var(--accent); }
+.balance-btn.primary:hover { background: #7040ff; }
+
+/* QUICK STATS */
+.stats-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 16px; margin-bottom: 24px;
+}
+@media(max-width:640px) { .stats-grid { grid-template-columns: 1fr; } }
+
+.stat-card {
+  background: var(--white); border: 1.5px solid var(--border);
+  border-radius: 16px; padding: 20px 24px;
+}
+.stat-card .label { font-size: 12px; color: var(--muted); font-weight: 600; margin-bottom: 8px; letter-spacing: 0.3px; }
+.stat-card .value {
+  font-family: 'Clash Display', sans-serif;
+  font-size: 28px; font-weight: 700; letter-spacing: -0.8px; color: var(--black);
+}
+.stat-card .change { font-size: 12px; color: var(--accent4); font-weight: 600; margin-top: 4px; }
+
+/* SECTIONS */
+.section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px;
+}
+.section-header h2 {
+  font-family: 'Clash Display', sans-serif;
+  font-size: 20px; font-weight: 700; letter-spacing: -0.3px; color: var(--black);
+}
+
+/* RECEIVE PAYMENT FORM */
+.pay-form {
+  background: var(--white); border: 1.5px solid var(--border);
+  border-radius: 20px; padding: 28px; margin-bottom: 24px;
+}
+.pay-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media(max-width:640px) { .pay-form-grid { grid-template-columns: 1fr; } }
+
+/* PAYMENT LINK RESULT */
+.link-result {
+  background: var(--bg2); border: 1.5px solid var(--border);
+  border-radius: 12px; padding: 16px 20px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  margin-top: 16px; display: none;
+}
+.link-result .link-url {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; color: var(--accent); word-break: break-all;
+}
+
+/* TRANSACTIONS */
+.tx-list { background: var(--white); border: 1.5px solid var(--border); border-radius: 20px; overflow: hidden; }
+.tx-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 24px; border-bottom: 1px solid var(--border);
+  gap: 12px;
+}
+.tx-item:last-child { border-bottom: none; }
+.tx-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: var(--bg2); display: flex; align-items: center;
+  justify-content: center; font-size: 18px; flex-shrink: 0;
+}
+.tx-info { flex: 1; min-width: 0; }
+.tx-info .tx-name { font-size: 14px; font-weight: 600; color: var(--text); }
+.tx-info .tx-date { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.tx-amount { font-family: 'Clash Display', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
+.tx-amount.in { color: var(--accent4); }
+.tx-amount.out { color: var(--accent3); }
+
+.empty-state {
+  padding: 48px 24px; text-align: center;
+  color: var(--muted); font-size: 14px;
+}
+.empty-state .emoji { font-size: 40px; display: block; margin-bottom: 12px; }
+
+/* MODAL */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.4); z-index: 500;
+  align-items: center; justify-content: center; padding: 20px;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--white); border-radius: 24px;
+  padding: 36px; max-width: 440px; width: 100%;
+  position: relative;
+}
+.modal h2 {
+  font-family: 'Clash Display', sans-serif;
+  font-size: 24px; font-weight: 700; letter-spacing: -0.5px;
+  color: var(--black); margin-bottom: 8px;
+}
+.modal p { font-size: 14px; color: var(--muted); margin-bottom: 24px; }
+.modal-close {
+  position: absolute; top: 20px; right: 20px;
+  background: var(--bg2); border: none; border-radius: 8px;
+  width: 32px; height: 32px; cursor: pointer; font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+}
+</style>
+</head>
+<body>
+
+<div class="dash-wrap">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <a href="index.html" class="sidebar-logo"><span class="dot"></span> HoldPay</a>
+
+    <div class="sidebar-label">Wallet</div>
+    <a href="#overview" class="sidebar-link active" onclick="showSection('overview',this)">
+      <span class="icon">📊</span> Overview
+    </a>
+    <a href="#receive" class="sidebar-link" onclick="showSection('receive',this)">
+      <span class="icon">⬇️</span> Receive Payment
+    </a>
+    <a href="#withdraw" class="sidebar-link" onclick="showSection('withdraw',this)">
+      <span class="icon">⬆️</span> Withdraw
+    </a>
+    <a href="#send" class="sidebar-link" onclick="showSection('send',this)">
+      <span class="icon">💸</span> Send Payment
+    </a>
+    <a href="#transactions" class="sidebar-link" onclick="showSection('transactions',this)">
+      <span class="icon">📋</span> Transactions
+    </a>
+
+    <div class="sidebar-label">Tools</div>
+    <a href="#links" class="sidebar-link" onclick="showSection('links',this)">
+      <span class="icon">🔗</span> Payment Links
+    </a>
+    <a href="developers.html" class="sidebar-link">
+      <span class="icon">⚙️</span> API Keys
+    </a>
+
+    <div class="sidebar-bottom">
+      <div class="user-pill">
+        <div class="user-avatar" id="userAvatar">?</div>
+        <div>
+          <div class="user-name" id="userName">Loading...</div>
+          <div class="user-email" id="userEmail">—</div>
+        </div>
+      </div>
+      <a href="#" class="sidebar-link" onclick="logout()" style="color:var(--accent3);">
+        <span class="icon">🚪</span> Logout
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="dash-main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+        <h1 id="pageTitle">Overview</h1>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-accent btn-sm" onclick="showSection('receive', null)">+ Receive Payment</button>
+      </div>
+    </div>
+
+    <!-- OVERVIEW -->
+    <div id="sec-overview">
+      <!-- Balance -->
+      <div class="balance-card fade-up">
+        <div class="balance-label">Total Balance</div>
+        <div class="balance-amount" id="balanceUSD">$0.00</div>
+        <div class="balance-inr" id="balanceINR">≈ ₹0.00</div>
+        <div class="balance-actions">
+          <button class="balance-btn primary" onclick="showSection('receive',null)">⬇️ Receive</button>
+          <button class="balance-btn" onclick="showSection('withdraw',null)">⬆️ Withdraw</button>
+          <button class="balance-btn" onclick="showSection('send',null)">💸 Send</button>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid fade-up-2">
+        <div class="stat-card">
+          <div class="label">Total Received</div>
+          <div class="value" id="totalReceived">$0.00</div>
+          <div class="change">All time</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Transactions</div>
+          <div class="value" id="totalTx">0</div>
+          <div class="change">All time</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Payment Links</div>
+          <div class="value" id="totalLinks">0</div>
+          <div class="change">Created</div>
+        </div>
+      </div>
+
+      <!-- Recent Transactions -->
+      <div class="section-header fade-up-3">
+        <h2>Recent Transactions</h2>
+      </div>
+      <div class="tx-list fade-up-3" id="txList">
+        <div class="empty-state">
+          <span class="emoji">📭</span>
+          No transactions yet. Create a payment link to get started!
+        </div>
+      </div>
+    </div>
+
+    <!-- RECEIVE PAYMENT -->
+    <div id="sec-receive" style="display:none;">
+      <div class="pay-form fade-up">
+        <h2 style="font-family:'Clash Display',sans-serif;font-size:22px;font-weight:700;letter-spacing:-0.3px;color:var(--black);margin-bottom:6px;">Receive Payment</h2>
+        <p style="font-size:14px;color:var(--muted);margin-bottom:24px;">Generate a crypto payment link to share with anyone.</p>
+
+        <div id="receiveAlert"></div>
+
+        <div class="pay-form-grid">
+          <div class="form-group">
+            <label class="input-label">Amount (USD)</label>
+            <input type="number" class="input" id="payAmount" placeholder="10.00" min="1" step="0.01">
+          </div>
+          <div class="form-group">
+            <label class="input-label">Currency</label>
+            <select class="input" id="payCurrency">
+              <option value="USDT">USDT</option>
+              <option value="USDC">USDC</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="input-label">Description (optional)</label>
+          <input type="text" class="input" id="payDesc" placeholder="Payment for freelance work">
+        </div>
+
+        <button class="btn btn-primary btn-md" id="createLinkBtn" onclick="createPaymentLink()">
+          Generate Payment Link →
+        </button>
+
+        <div class="link-result" id="linkResult">
+          <div>
+            <div style="font-size:12px;color:var(--muted);margin-bottom:4px;">Payment Link</div>
+            <div class="link-url" id="linkUrl"></div>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="copyLink()">Copy</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- WITHDRAW -->
+    <div id="sec-withdraw" style="display:none;">
+      <div class="pay-form fade-up">
+        <h2 style="font-family:'Clash Display',sans-serif;font-size:22px;font-weight:700;letter-spacing:-0.3px;color:var(--black);margin-bottom:6px;">Withdraw Funds</h2>
+        <p style="font-size:14px;color:var(--muted);margin-bottom:24px;">Send your balance to UPI, PayPal or crypto wallet.</p>
+
+        <div id="withdrawAlert"></div>
+
+        <div class="form-group">
+          <label class="input-label">Withdraw Method</label>
+          <select class="input" id="withdrawMethod" onchange="updateWithdrawFields()">
+            <option value="crypto">Crypto Wallet</option>
+            <option value="upi">UPI (Pro+)</option>
+            <option value="paypal">PayPal (Pro+)</option>
+          </select>
+        </div>
+
+        <div id="cryptoFields">
+          <div class="pay-form-grid">
+            <div class="form-group">
+              <label class="input-label">Wallet Address</label>
+              <input type="text" class="input" id="walletAddr" placeholder="TRC20 address">
+            </div>
+            <div class="form-group">
+              <label class="input-label">Network</label>
+              <select class="input" id="network">
+                <option value="TRC20">TRC20 (TRON)</option>
+                <option value="BEP20">BEP20 (BSC)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div id="upiFields" style="display:none;">
+          <div class="form-group">
+            <label class="input-label">UPI ID</label>
+            <input type="text" class="input" id="upiId" placeholder="yourname@upi">
+          </div>
+          <div class="alert alert-info" style="margin-bottom:16px;">UPI withdrawal available on Pro plan.</div>
+        </div>
+
+        <div class="form-group">
+          <label class="input-label">Amount (USDT)</label>
+          <input type="number" class="input" id="withdrawAmount" placeholder="10.00" min="1">
+        </div>
+
+        <button class="btn btn-primary btn-md" id="withdrawBtn" onclick="doWithdraw()">
+          Withdraw Now →
+        </button>
+      </div>
+    </div>
+
+    <!-- SEND PAYMENT -->
+    <div id="sec-send" style="display:none;">
+      <div class="pay-form fade-up">
+        <h2 style="font-family:'Clash Display',sans-serif;font-size:22px;font-weight:700;letter-spacing:-0.3px;color:var(--black);margin-bottom:6px;">Send Payment</h2>
+        <p style="font-size:14px;color:var(--muted);margin-bottom:24px;">Send crypto to any wallet address.</p>
+        <div id="sendAlert"></div>
+        <div class="form-group">
+          <label class="input-label">Recipient Wallet Address</label>
+          <input type="text" class="input" id="sendAddr" placeholder="TRC20 wallet address">
+        </div>
+        <div class="pay-form-grid">
+          <div class="form-group">
+            <label class="input-label">Amount (USDT)</label>
+            <input type="number" class="input" id="sendAmount" placeholder="10.00">
+          </div>
+          <div class="form-group">
+            <label class="input-label">Network</label>
+            <select class="input" id="sendNetwork">
+              <option value="TRC20">TRC20</option>
+              <option value="BEP20">BEP20</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-md" id="sendBtn" onclick="doSend()">Send →</button>
+      </div>
+    </div>
+
+    <!-- TRANSACTIONS -->
+    <div id="sec-transactions" style="display:none;">
+      <div class="tx-list fade-up" id="txListFull">
+        <div class="empty-state"><span class="emoji">📭</span>No transactions yet.</div>
+      </div>
+    </div>
+
+    <!-- PAYMENT LINKS -->
+    <div id="sec-links" style="display:none;">
+      <div class="pay-form fade-up">
+        <h2 style="font-family:'Clash Display',sans-serif;font-size:22px;font-weight:700;margin-bottom:20px;">Your Payment Links</h2>
+        <div id="linksList">
+          <div class="empty-state"><span class="emoji">🔗</span>No payment links yet. Create one from Receive Payment!</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="js/holdpay.js"></script>
+<script>
+const supabase = window.supabase.createClient(HP.SUPABASE_URL, HP.SUPABASE_ANON_KEY);
+let currentUser = null;
+const USD_TO_INR = 83.5;
+
+// Auth check
+async function initDashboard() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = 'login.html'; return; }
+
+  currentUser = session.user;
+  const name = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
+  const email = currentUser.email;
+
+  document.getElementById('userName').textContent = name;
+  document.getElementById('userEmail').textContent = email;
+  document.getElementById('userAvatar').textContent = name[0].toUpperCase();
+
+  HP.saveUser(currentUser.id, email);
+  loadDashboardData();
+}
+
+function loadDashboardData() {
+  const balance = HP.getBalance();
+  const txs = HP.getTransactions();
+  const links = HP.getPaymentLinks();
+
+  document.getElementById('balanceUSD').textContent = HP.formatUSD(balance);
+  document.getElementById('balanceINR').textContent = '≈ ' + HP.formatINR(balance * USD_TO_INR);
+
+  const totalRec = txs.filter(t => t.type === 'in').reduce((s, t) => s + (t.amount || 0), 0);
+  document.getElementById('totalReceived').textContent = HP.formatUSD(totalRec);
+  document.getElementById('totalTx').textContent = txs.length;
+  document.getElementById('totalLinks').textContent = links.length;
+
+  renderTx('txList', txs.slice(0, 5));
+  renderTx('txListFull', txs);
+  renderLinks();
+}
+
+function renderTx(elId, txs) {
+  const el = document.getElementById(elId);
+  if (!txs.length) {
+    el.innerHTML = '<div class="empty-state"><span class="emoji">📭</span>No transactions yet.</div>';
+    return;
+  }
+  el.innerHTML = txs.map(tx => `
+    <div class="tx-item">
+      <div class="tx-icon">${tx.type === 'in' ? '⬇️' : '⬆️'}</div>
+      <div class="tx-info">
+        <div class="tx-name">${tx.description || (tx.type === 'in' ? 'Payment Received' : 'Withdrawal')}</div>
+        <div class="tx-date">${new Date(tx.timestamp).toLocaleDateString()}</div>
+      </div>
+      <div class="tx-amount ${tx.type === 'in' ? 'in' : 'out'}">
+        ${tx.type === 'in' ? '+' : '-'}$${(tx.amount || 0).toFixed(2)}
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderLinks() {
+  const links = HP.getPaymentLinks();
+  const el = document.getElementById('linksList');
+  if (!links.length) {
+    el.innerHTML = '<div class="empty-state"><span class="emoji">🔗</span>No payment links yet.</div>';
+    return;
+  }
+  el.innerHTML = links.map(l => `
+    <div class="tx-item">
+      <div class="tx-icon">🔗</div>
+      <div class="tx-info">
+        <div class="tx-name">$${l.amount} ${l.currency || 'USDT'}</div>
+        <div class="tx-date">${new Date(l.createdAt).toLocaleDateString()}</div>
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="navigator.clipboard.writeText('${l.payLink||''}')">Copy</button>
+    </div>
+  `).join('');
+}
+
+// Navigation
+function showSection(name, linkEl) {
+  ['overview','receive','withdraw','send','transactions','links'].forEach(s => {
+    document.getElementById('sec-' + s).style.display = s === name ? 'block' : 'none';
+  });
+  document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+  if (linkEl) linkEl.classList.add('active');
+  const titles = { overview:'Overview', receive:'Receive Payment', withdraw:'Withdraw', send:'Send Payment', transactions:'Transactions', links:'Payment Links' };
+  document.getElementById('pageTitle').textContent = titles[name] || name;
+  if (name === 'transactions') renderTx('txListFull', HP.getTransactions());
+  if (name === 'links') renderLinks();
+  return false;
+}
+
+// Create payment link
+async function createPaymentLink() {
+  const amount = parseFloat(document.getElementById('payAmount').value);
+  const currency = document.getElementById('payCurrency').value;
+  const description = document.getElementById('payDesc').value;
+  const btn = document.getElementById('createLinkBtn');
+  const alertEl = document.getElementById('receiveAlert');
+
+  if (!amount || amount <= 0) {
+    alertEl.innerHTML = '<div class="alert alert-error" style="margin-bottom:16px;">Enter a valid amount.</div>';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loader"></span> Creating...';
+  alertEl.innerHTML = '';
+
+  try {
+    const data = await HP.createPaymentLink({ amount, currency, description });
+    if (data.result === 100) {
+      const linkUrl = data.payLink;
+      document.getElementById('linkUrl').textContent = linkUrl;
+      document.getElementById('linkResult').style.display = 'flex';
+      HP.savePaymentLink({ amount, currency, description, payLink: linkUrl });
+      HP.saveTransaction({ type: 'in', amount, description: description || 'Payment Link Created', currency });
+      loadDashboardData();
+      alertEl.innerHTML = '<div class="alert alert-success" style="margin-bottom:16px;">✅ Payment link created!</div>';
+    } else {
+      alertEl.innerHTML = `<div class="alert alert-error" style="margin-bottom:16px;">${data.message || 'Failed to create link.'}</div>`;
+    }
+  } catch (e) {
+    alertEl.innerHTML = `<div class="alert alert-error" style="margin-bottom:16px;">${e.message}</div>`;
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = 'Generate Payment Link →';
+}
+
+function copyLink() {
+  const url = document.getElementById('linkUrl').textContent;
+  HP.copy(url).then(() => alert('Link copied!'));
+}
+
+// Withdraw
+function updateWithdrawFields() {
+  const method = document.getElementById('withdrawMethod').value;
+  document.getElementById('cryptoFields').style.display = method === 'crypto' ? 'block' : 'none';
+  document.getElementById('upiFields').style.display = method === 'upi' ? 'block' : 'none';
+}
+
+async function doWithdraw() {
+  const method = document.getElementById('withdrawMethod').value;
+  const amount = parseFloat(document.getElementById('withdrawAmount').value);
+  const btn = document.getElementById('withdrawBtn');
+  const alertEl = document.getElementById('withdrawAlert');
+
+  if (!amount || amount <= 0) {
+    alertEl.innerHTML = '<div class="alert alert-error" style="margin-bottom:16px;">Enter a valid amount.</div>';
+    return;
+  }
+
+  if (method !== 'crypto') {
+    alertEl.innerHTML = '<div class="alert alert-info" style="margin-bottom:16px;">UPI/PayPal withdrawal coming soon with Pro plan.</div>';
+    return;
+  }
+
+  const address = document.getElementById('walletAddr').value.trim();
+  const network = document.getElementById('network').value;
+  if (!address) {
+    alertEl.innerHTML = '<div class="alert alert-error" style="margin-bottom:16px;">Enter wallet address.</div>';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loader"></span> Processing...';
+  alertEl.innerHTML = '';
+
+  try {
+    const data = await HP.payout({ address, amount, currency: 'USDT', network });
+    if (data.result === 100) {
+      const newBal = Math.max(0, HP.getBalance() - amount);
+      HP.saveBalance(newBal);
+      HP.saveTransaction({ type: 'out', amount, description: `Withdraw to ${network}` });
+      loadDashboardData();
+      alertEl.innerHTML = '<div class="alert alert-success" style="margin-bottom:16px;">✅ Withdrawal initiated!</div>';
+    } else {
+      alertEl.innerHTML = `<div class="alert alert-error" style="margin-bottom:16px;">${data.message || 'Withdrawal failed.'}</div>`;
+    }
+  } catch (e) {
+    alertEl.innerHTML = `<div class="alert alert-error" style="margin-bottom:16px;">${e.message}</div>`;
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = 'Withdraw Now →';
+}
+
+async function doSend() {
+  const address = document.getElementById('sendAddr').value.trim();
+  const amount = parseFloat(document.getElementById('sendAmount').value);
+  const network = document.getElementById('sendNetwork').value;
+  const btn = document.getElementById('sendBtn');
+  const alertEl = document.getElementById('sendAlert');
+
+  if (!address || !amount) {
+    alertEl.innerHTML = '<div class="alert alert-error" style="margin-bottom:16px;">Fill all fields.</div>';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loader"></span> Sending...';
+
+  try {
+    const data = await HP.payout({ address, amount, currency: 'USDT', network });
+    if (data.result === 100) {
+      HP.saveTransaction({ type: 'out', amount, description: `Sent to ${address.slice(0,8)}...` });
+      loadDashboardData();
+      alertEl.innerHTML = '<div class="alert alert-success" style="margin-bottom:16px;">✅ Payment sent!</div>';
+    } else {
+      alertEl.innerHTML = `<div class="alert alert-error" style="margin-bottom:16px;">${data.message || 'Send failed.'}</div>`;
+    }
+  } catch (e) {
+    alertEl.innerHTML = `<div class="alert alert-error" style="margin-bottom:16px;">${e.message}</div>`;
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = 'Send →';
+}
+
+async function logout() {
+  await supabase.auth.signOut();
+  localStorage.clear();
+  window.location.href = 'index.html';
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+initDashboard();
+</script>
+</body>
+</html>

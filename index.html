@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HoldPay — Hold. Pay. Anywhere. No Bank Needed.</title>
+<meta name="description" content="Hold payments without a bank account. No KYC. No limits. Works worldwide. Accept crypto — withdraw to UPI or PayPal anytime.">
+<link rel="stylesheet" href="css/main.css">
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LRFXVMYHMQ"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-LRFXVMYHMQ');</script>
+<style>
+
+/* HERO */
+.hero {
+  min-height: 94vh;
+  display: flex; flex-direction: column;
+  justify-content: center; align-items: center;
+  text-align: center; padding: 100px 24px 80px;
+  position: relative; overflow: hidden;
+}
+
+.hero-bg {
+  position: absolute; inset: 0; z-index: 0;
+  background:
+    radial-gradient(ellipse 70% 50% at 50% -10%, rgba(96,48,240,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 40% at 90% 50%, rgba(255,51,102,0.06) 0%, transparent 50%);
+}
+
+.hero-grid {
+  position: absolute; inset: 0; z-index: 0;
+  background-image:
+    linear-gradient(rgba(96,48,240,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(96,48,240,0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 0%, transparent 70%);
+}
+
+.hero > * { position: relative; z-index: 1; }
+
+.hero-title {
+  font-family: 'Clash Display', sans-serif;
+  font-size: clamp(52px, 10vw, 108px);
+  font-weight: 700; letter-spacing: -3px; line-height: 0.95;
+  color: var(--black); margin-bottom: 28px;
+}
+
+.hero-title .line-accent {
+  display: block;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent3) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+
+.hero-sub {
+  font-size: clamp(16px, 2vw, 19px);
+  color: var(--muted); max-width: 540px;
+  line-height: 1.65; margin-bottom: 44px;
+  font-weight: 500;
+}
+
+.hero-btns {
+  display: flex; gap: 12px; flex-wrap: wrap;
+  justify-content: center; margin-bottom: 72px;
+}
+
+/* TRUST PILLS */
+.trust-row {
+  display: flex; gap: 12px; flex-wrap: wrap;
+  justify-content: center; margin-bottom: 80px;
+}
+.trust-pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--white); border: 1.5px solid var(--border);
+  border-radius: 100px; padding: 8px 18px;
+  font-size: 13px; font-weight: 600; color: var(--text2);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.trust-pill span { font-size: 16px; }
+
+/* STATS */
+.stats-row {
+  display: flex; gap: 64px; flex-wrap: wrap;
+  justify-content: center;
+}
+.stat-item { text-align: center; }
+
+/* MARQUEE SECTION */
+.marquee-section { margin: 0; }
+
+/* HOW IT WORKS */
+.steps-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 2px; position: relative;
+}
+@media(max-width:768px) { .steps-grid { grid-template-columns: 1fr 1fr; gap: 12px; } }
+
+.step-card {
+  background: var(--bg2); border: 1.5px solid var(--border);
+  border-radius: 20px; padding: 28px;
+  position: relative; transition: all 0.3s;
+}
+.step-card:hover { border-color: var(--accent); background: var(--white); }
+.step-num {
+  font-family: 'Clash Display', sans-serif;
+  font-size: 64px; font-weight: 700;
+  color: var(--border2); line-height: 1;
+  margin-bottom: 16px; letter-spacing: -2px;
+}
+.step-card h3 {
+  font-family: 'Clash Display', sans-serif;
+  font-size: 18px; font-weight: 700; letter-spacing: -0.3px;
+  color: var(--black); margin-bottom: 8px;
+}
+.step-card p { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+/* BIG FEATURE */
+.big-feature {
+  background: var(--black); border-radius: 28px;
+  padding: 64px; color: var(--white);
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 48px; align-items: center;
+  position: relative; overflow: hidden;
+}
+@media(max-width:768px) { .big-feature { grid-template-columns: 1fr; padding: 36px 24px; } }
+
+.big-feature::before {
+  content: '';
+  position: absolute; top: -50%; right: -20%;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(96,48,240,0.3) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.big-feature h2 {
+  font-family: 'Clash Display', sans-serif;
+  font-size: clamp(32px, 4vw, 52px);
+  font-weight: 700; letter-spacing: -1.5px; line-height: 1.1;
+  margin-bottom: 20px;
+}
+.big-feature h2 span {
+  background: linear-gradient(135deg, #a080ff, #ff6090);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.big-feature p {
+  font-size: 16px; color: rgba(255,255,255,0.6);
+  line-height: 1.65; margin-bottom: 32px;
+}
+
+.feature-list { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+.feature-list li {
+  display: flex; align-items: center; gap: 12px;
+  font-size: 15px; color: rgba(255,255,255,0.85); font-weight: 500;
+}
+.feature-list li::before {
+  content: '✓'; width: 24px; height: 24px;
+  background: var(--accent); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; flex-shrink: 0; font-weight: 700;
+}
+
+/* MOCKUP */
+.mockup-card {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 20px; padding: 28px;
+}
+.mockup-balance {
+  font-family: 'Clash Display', sans-serif;
+  font-size: 48px; font-weight: 700;
+  letter-spacing: -2px; color: white; margin-bottom: 4px;
+}
+.mockup-label { font-size: 12px; color: rgba(255,255,255,0.4); font-family: 'JetBrains Mono', monospace; letter-spacing: 1px; margin-bottom: 24px; }
+
+.mockup-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
+  font-size: 13px;
+}
+.mockup-row:last-child { border-bottom: none; }
+.mockup-row .label { color: rgba(255,255,255,0.5); }
+.mockup-row .val { color: white; font-weight: 600; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+.mockup-row .val.green { color: var(--accent4); }
+.mockup-row .val.purple { color: #a080ff; }
+
+/* USE CASES */
+.usecase-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+}
+@media(max-width:768px) { .usecase-grid { grid-template-columns: 1fr; } }
+
+.usecase-card {
+  border: 1.5px solid var(--border);
+  border-radius: 20px; padding: 28px;
+  transition: all 0.3s; cursor: default;
+}
+.usecase-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 12px 40px rgba(96,48,240,0.08);
+  transform: translateY(-4px);
+}
+.usecase-card .emoji { font-size: 36px; margin-bottom: 16px; display: block; }
+.usecase-card h3 {
+  font-family: 'Clash Display', sans-serif;
+  font-size: 20px; font-weight: 700; letter-spacing: -0.3px;
+  color: var(--black); margin-bottom: 8px;
+}
+.usecase-card p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+/* CTA SECTION */
+.cta-section {
+  background: var(--accent); border-radius: 28px;
+  padding: 80px 48px; text-align: center;
+  position: relative; overflow: hidden;
+}
+.cta-section::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, var(--accent) 0%, #9060ff 50%, var(--accent3) 100%);
+  opacity: 0.9;
+}
+.cta-section > * { position: relative; z-index: 1; }
+.cta-section h2 {
+  font-family: 'Clash Display', sans-serif;
+  font-size: clamp(32px, 5vw, 60px);
+  font-weight: 700; letter-spacing: -1.5px;
+  color: white; margin-bottom: 16px;
+}
+.cta-section p { font-size: 17px; color: rgba(255,255,255,0.8); margin-bottom: 36px; }
+.cta-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+</style>
+</head>
+<body>
+
+<div id="nav" data-page="home"></div>
+
+<main>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-grid"></div>
+
+    <div class="hero-badge fade-up">
+      <span class="dot"></span>
+      PAYMENTS WITHOUT BORDERS
+    </div>
+
+    <h1 class="hero-title fade-up-2">
+      Hold Money.<br>
+      <span class="line-accent">No Bank Needed.</span>
+    </h1>
+
+    <p class="hero-sub fade-up-3">
+      Accept payments from anyone worldwide. Hold your balance. Withdraw to UPI, PayPal or crypto — whenever you want. Zero KYC. Zero bank account required.
+    </p>
+
+    <div class="hero-btns fade-up-4">
+      <a href="signup.html" class="btn btn-primary btn-lg">Start Holding Free →</a>
+      <a href="how.html" class="btn btn-outline btn-lg">How it works</a>
+    </div>
+
+    <div class="trust-row fade-up-5">
+      <div class="trust-pill"><span>🌍</span> 185+ Countries</div>
+      <div class="trust-pill"><span>🔒</span> No KYC Required</div>
+      <div class="trust-pill"><span>⚡</span> Instant Setup</div>
+      <div class="trust-pill"><span>₿</span> Crypto Powered</div>
+    </div>
+
+    <div class="stats-row fade-up-5">
+      <div class="stat-item">
+        <div class="stat-num">0%</div>
+        <div class="stat-label">Hold Fee</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">185+</div>
+        <div class="stat-label">Countries</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">30s</div>
+        <div class="stat-label">Setup Time</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">0</div>
+        <div class="stat-label">KYC Required</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MARQUEE -->
+  <div class="marquee-section">
+    <div class="marquee-wrap">
+      <div class="marquee-track">
+        <span class="marquee-item">USDT <span>SUPPORTED</span></span>
+        <span class="marquee-item">USDC <span>SUPPORTED</span></span>
+        <span class="marquee-item">UPI <span>WITHDRAW</span></span>
+        <span class="marquee-item">PAYPAL <span>WITHDRAW</span></span>
+        <span class="marquee-item">NO KYC <span>REQUIRED</span></span>
+        <span class="marquee-item">185+ <span>COUNTRIES</span></span>
+        <span class="marquee-item">ZERO <span>HOLD FEE</span></span>
+        <span class="marquee-item">INSTANT <span>SETUP</span></span>
+        <span class="marquee-item">USDT <span>SUPPORTED</span></span>
+        <span class="marquee-item">USDC <span>SUPPORTED</span></span>
+        <span class="marquee-item">UPI <span>WITHDRAW</span></span>
+        <span class="marquee-item">PAYPAL <span>WITHDRAW</span></span>
+        <span class="marquee-item">NO KYC <span>REQUIRED</span></span>
+        <span class="marquee-item">185+ <span>COUNTRIES</span></span>
+        <span class="marquee-item">ZERO <span>HOLD FEE</span></span>
+        <span class="marquee-item">INSTANT <span>SETUP</span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <section class="section">
+    <div class="container">
+      <div class="section-label fade-up">HOW IT WORKS</div>
+      <h2 class="section-title fade-up-2">4 Simple Steps</h2>
+      <p class="section-sub fade-up-3" style="margin-bottom:48px;">From signup to receiving your first payment in under 2 minutes.</p>
+
+      <div class="steps-grid">
+        <div class="step-card fade-up">
+          <div class="step-num">01</div>
+          <div style="font-size:28px;margin-bottom:12px;">📧</div>
+          <h3>Sign Up Free</h3>
+          <p>Email only. No bank, no ID, no KYC. 30 seconds to get started.</p>
+        </div>
+        <div class="step-card fade-up-2">
+          <div class="step-num">02</div>
+          <div style="font-size:28px;margin-bottom:12px;">🔗</div>
+          <h3>Get Payment Link</h3>
+          <p>Generate a crypto payment link or QR code instantly from your dashboard.</p>
+        </div>
+        <div class="step-card fade-up-3">
+          <div class="step-num">03</div>
+          <div style="font-size:28px;margin-bottom:12px;">💰</div>
+          <h3>Receive & Hold</h3>
+          <p>Funds arrive in USDT/USDC. Held securely — no bank needed.</p>
+        </div>
+        <div class="step-card fade-up-4">
+          <div class="step-num">04</div>
+          <div style="font-size:28px;margin-bottom:12px;">🚀</div>
+          <h3>Withdraw Anytime</h3>
+          <p>Send to UPI, PayPal, or any crypto wallet. Your money, your rules.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BIG FEATURE -->
+  <section class="section" style="padding-top:0;">
+    <div class="container">
+      <div class="big-feature fade-up">
+        <div>
+          <div class="tag" style="background:rgba(160,128,255,0.15);color:#a080ff;border:1px solid rgba(160,128,255,0.25);margin-bottom:20px;">BUILT FOR EVERYONE</div>
+          <h2>Stripe + PayPal + Paytm.<br><span>But worldwide.</span></h2>
+          <p>HoldPay gives everyone — students, freelancers, creators — the power to receive global payments without a bank account or ID.</p>
+          <ul class="feature-list">
+            <li>No bank account required</li>
+            <li>No KYC or ID verification</li>
+            <li>Works in 185+ countries</li>
+            <li>Instant payment links & QR codes</li>
+            <li>Withdraw to UPI, PayPal or crypto</li>
+          </ul>
+        </div>
+        <div>
+          <div class="mockup-card">
+            <div class="mockup-balance">$2,450.00</div>
+            <div class="mockup-label">TOTAL BALANCE · USDC</div>
+            <div class="mockup-row">
+              <span class="label">Last payment</span>
+              <span class="val green">+$150.00</span>
+            </div>
+            <div class="mockup-row">
+              <span class="label">Payment link</span>
+              <span class="val purple">holdpay.app/pay/dax</span>
+            </div>
+            <div class="mockup-row">
+              <span class="label">Withdraw method</span>
+              <span class="val">UPI · PayPal · Crypto</span>
+            </div>
+            <div class="mockup-row">
+              <span class="label">KYC required</span>
+              <span class="val green">Never</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- USE CASES -->
+  <section class="section" style="background:var(--bg2);padding:80px 0;">
+    <div class="container">
+      <div class="section-label fade-up">WHO IS IT FOR</div>
+      <h2 class="section-title fade-up-2" style="margin-bottom:48px;">Built for the unbanked world</h2>
+      <div class="usecase-grid">
+        <div class="usecase-card fade-up">
+          <span class="emoji">🎓</span>
+          <h3>Students & Minors</h3>
+          <p>No bank account? No problem. Accept payments from clients worldwide while still in school.</p>
+        </div>
+        <div class="usecase-card fade-up-2">
+          <span class="emoji">💼</span>
+          <h3>Freelancers</h3>
+          <p>Get paid by international clients in crypto. Hold in USDC, withdraw to UPI when you need it.</p>
+        </div>
+        <div class="usecase-card fade-up-3">
+          <span class="emoji">🛍️</span>
+          <h3>Small Businesses</h3>
+          <p>Accept online payments without a merchant account. Works instantly, no paperwork.</p>
+        </div>
+        <div class="usecase-card fade-up">
+          <span class="emoji">🎨</span>
+          <h3>Creators</h3>
+          <p>Sell digital products, courses or services. Get paid globally, hold in stable crypto.</p>
+        </div>
+        <div class="usecase-card fade-up-2">
+          <span class="emoji">⚙️</span>
+          <h3>Developers</h3>
+          <p>Integrate payments into your app with our simple API. No complex KYC for your users.</p>
+        </div>
+        <div class="usecase-card fade-up-3">
+          <span class="emoji">🌍</span>
+          <h3>Anyone, Anywhere</h3>
+          <p>India, Africa, Southeast Asia — if you have internet, you can use HoldPay.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="section">
+    <div class="container">
+      <div class="cta-section fade-up">
+        <h2>Ready to hold your first payment?</h2>
+        <p>Sign up in 30 seconds. No bank. No KYC. Just your email.</p>
+        <div class="cta-btns">
+          <a href="signup.html" class="btn btn-white btn-lg">Start for Free →</a>
+          <a href="pricing.html" class="btn btn-lg" style="background:rgba(255,255,255,0.15);color:white;border:1.5px solid rgba(255,255,255,0.3);">View Pricing</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<div id="footer"></div>
+<script src="js/holdpay.js"></script>
+</body>
+</html>

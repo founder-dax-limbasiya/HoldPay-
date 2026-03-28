@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login — HoldPay</title>
+<link rel="stylesheet" href="css/main.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+.auth-wrap { min-height: 100vh; display: flex; }
+.auth-left {
+  flex: 1; background: var(--black);
+  padding: 60px; display: flex; flex-direction: column;
+  justify-content: center; position: relative; overflow: hidden;
+}
+@media(max-width:768px) { .auth-left { display: none; } }
+.auth-left::before {
+  content: ''; position: absolute; top: -20%; right: -10%;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(96,48,240,0.2) 0%, transparent 60%);
+}
+.auth-left-content { position: relative; z-index: 1; }
+.auth-logo {
+  font-family: 'Clash Display', sans-serif;
+  font-size: 28px; font-weight: 700; color: white;
+  text-decoration: none; display: flex; align-items: center; gap: 10px;
+  margin-bottom: 64px;
+}
+.auth-logo .dot { width: 10px; height: 10px; background: var(--accent); border-radius: 50%; }
+.auth-headline {
+  font-family: 'Clash Display', sans-serif;
+  font-size: 48px; font-weight: 700; letter-spacing: -1.5px;
+  line-height: 1.05; color: white; margin-bottom: 20px;
+}
+.auth-headline span {
+  background: linear-gradient(135deg, #a080ff, #ff6090);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.auth-sub { font-size: 16px; color: rgba(255,255,255,0.5); line-height: 1.65; }
+
+.auth-right {
+  width: 480px; display: flex; flex-direction: column;
+  justify-content: center; padding: 60px 48px;
+  background: var(--white);
+}
+@media(max-width:768px) {
+  .auth-right { width: 100%; padding: 40px 24px; }
+  .auth-wrap { flex-direction: column; }
+}
+.auth-right h1 {
+  font-family: 'Clash Display', sans-serif;
+  font-size: 32px; font-weight: 700; letter-spacing: -0.8px;
+  color: var(--black); margin-bottom: 8px;
+}
+.auth-right p { font-size: 15px; color: var(--muted); margin-bottom: 36px; }
+
+.oauth-btn {
+  width: 100%; display: flex; align-items: center; justify-content: center; gap: 12px;
+  padding: 14px; border-radius: 10px; font-size: 15px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+  border: 1.5px solid var(--border); background: var(--white); color: var(--text);
+  font-family: 'Cabinet Grotesk', sans-serif; margin-bottom: 12px;
+}
+.oauth-btn:hover { border-color: var(--border2); background: var(--bg2); transform: translateY(-1px); }
+
+.divider-text {
+  display: flex; align-items: center; gap: 12px;
+  color: var(--muted); font-size: 13px; font-weight: 500; margin: 20px 0;
+}
+.divider-text::before, .divider-text::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+.form-group { margin-bottom: 16px; }
+.forgot-link { font-size: 13px; color: var(--accent); text-decoration: none; font-weight: 600; }
+.forgot-link:hover { text-decoration: underline; }
+
+.auth-footer-text { text-align: center; margin-top: 24px; font-size: 14px; color: var(--muted); }
+.auth-footer-text a { color: var(--accent); font-weight: 600; text-decoration: none; }
+</style>
+</head>
+<body>
+
+<div class="auth-wrap">
+
+  <!-- LEFT -->
+  <div class="auth-left">
+    <div class="auth-left-content">
+      <a href="index.html" class="auth-logo"><span class="dot"></span> HoldPay</a>
+      <h2 class="auth-headline">Welcome<br><span>back.</span></h2>
+      <p class="auth-sub">Your payments are waiting. Log in to access your dashboard, payment links and balance.</p>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="auth-right">
+    <h1>Log in</h1>
+    <p>Welcome back to HoldPay.</p>
+
+    <div id="alertBox"></div>
+
+    <button class="oauth-btn" onclick="signInGoogle()">
+      <img src="https://www.google.com/favicon.ico" alt="Google" width="20" height="20">
+      Continue with Google
+    </button>
+
+    <button class="oauth-btn" onclick="signInGitHub()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+      Continue with GitHub
+    </button>
+
+    <div class="divider-text">or log in with email</div>
+
+    <div class="form-group">
+      <label class="input-label">Email Address</label>
+      <input type="email" class="input" id="emailInput" placeholder="you@example.com">
+    </div>
+    <div class="form-group">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <label class="input-label" style="margin:0;">Password</label>
+        <a href="#" class="forgot-link" onclick="forgotPassword()">Forgot password?</a>
+      </div>
+      <input type="password" class="input" id="passwordInput" placeholder="Your password"
+        onkeydown="if(event.key==='Enter') signInEmail()">
+    </div>
+
+    <button class="btn btn-primary btn-md" style="width:100%;justify-content:center;margin-top:8px;"
+      id="loginBtn" onclick="signInEmail()">
+      Log In →
+    </button>
+
+    <div class="auth-footer-text">
+      Don't have an account? <a href="signup.html">Sign up free</a>
+    </div>
+  </div>
+
+</div>
+
+<script src="js/holdpay.js"></script>
+<script>
+const supabase = window.supabase.createClient(HP.SUPABASE_URL, HP.SUPABASE_ANON_KEY);
+
+function showAlert(msg, type = 'error') {
+  document.getElementById('alertBox').innerHTML =
+    `<div class="alert alert-${type}" style="margin-bottom:16px;">${msg}</div>`;
+}
+
+async function signInEmail() {
+  const email = document.getElementById('emailInput').value.trim();
+  const pass  = document.getElementById('passwordInput').value;
+  const btn   = document.getElementById('loginBtn');
+  if (!email || !pass) return showAlert('Email and password required.');
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loader"></span> Logging in...';
+
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
+
+  if (error) {
+    showAlert(error.message);
+    btn.disabled = false;
+    btn.innerHTML = 'Log In →';
+    return;
+  }
+
+  HP.saveUser(data.user.id, data.user.email);
+  window.location.href = 'dashboard.html';
+}
+
+async function signInGoogle() {
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: window.location.origin + '/dashboard.html' }
+  });
+  if (error) showAlert(error.message);
+}
+
+async function signInGitHub() {
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'github',
+    options: { redirectTo: window.location.origin + '/dashboard.html' }
+  });
+  if (error) showAlert(error.message);
+}
+
+async function forgotPassword() {
+  const email = document.getElementById('emailInput').value.trim();
+  if (!email) return showAlert('Enter your email first.');
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + '/reset-password.html'
+  });
+  if (error) return showAlert(error.message);
+  showAlert('✅ Password reset email sent!', 'success');
+}
+
+supabase.auth.getSession().then(({ data: { session } }) => {
+  if (session) window.location.href = 'dashboard.html';
+});
+</script>
+</body>
+</html>
