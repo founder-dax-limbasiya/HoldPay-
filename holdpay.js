@@ -11,7 +11,7 @@ const HP = {
 
   // ── Supabase project config (public values — safe in frontend) ──
   SUPABASE_URL: 'https://curruifdoznoafqniurv.supabase.co',
-  SUPABASE_ANON_KEY: '', // ← paste your anon key here (it's public-safe)
+  SUPABASE_ANON_KEY: '', //eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN1cnJ1aWZkb3pub2FmcW5pdXJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxNzI1NDcsImV4cCI6MjA4OTc0ODU0N30.bEn3ErXI2Dt9IPLfy0XW7Gm9JP1Y2L60zqgNEbXsaTc
 
   // Edge Function base URL
   get FUNCTIONS_URL() {
